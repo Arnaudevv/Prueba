@@ -1,75 +1,97 @@
 import random
 import time
 
-def mostrar_intro():
-    print("=== JUEGO: ADIVINA EL NÚMERO ===")
-    print("El ordenador pensará un número y tendrás que adivinarlo.")
-    print("Cuantos menos intentos uses, más puntos ganarás.")
+def intro():
+    titulo = "=== JUEGO: ADIVINA EL NÚMERO ==="
+    print(titulo)
+    print("El sistema elegirá un número secreto.")
+    print("Debes encontrarlo en el menor número de intentos posible.")
     print()
 
-def elegir_dificultad():
-    print("Selecciona dificultad:")
-    print("1 - Fácil (1 a 50)")
-    print("2 - Medio (1 a 100)")
-    print("3 - Difícil (1 a 200)")
-    
-    opcion = input("Opción: ")
+def seleccionar_nivel():
+    opciones = {
+        "1": 50,
+        "2": 100,
+        "3": 200
+    }
 
-    if opcion == "1":
-        return 50
-    elif opcion == "2":
-        return 100
-    else:
-        return 200
+    print("Nivel de dificultad")
+    print("1 -> Fácil (1-50)")
+    print("2 -> Medio (1-100)")
+    print("3 -> Difícil (1-200)")
 
-def jugar_ronda(limite):
-    numero = random.randint(1, limite)
-    intentos = 0
+    eleccion = input("Elige una opción: ")
 
+    return opciones.get(eleccion, 200)
+
+def obtener_numero(limite):
+    return random.randint(1, limite)
+
+def pedir_intento(limite):
     while True:
+        entrada = input(f"Introduce un número entre 1 y {limite}: ")
         try:
-            guess = int(input(f"Adivina el número (1-{limite}): "))
-            intentos += 1
+            return int(entrada)
+        except:
+            print("Entrada inválida.")
 
-            if guess < numero:
-                print("Demasiado bajo.")
-            elif guess > numero:
-                print("Demasiado alto.")
-            else:
-                print(f"¡Correcto! Lo lograste en {intentos} intentos.")
-                return intentos
+def evaluar_intento(numero, intento):
+    if intento < numero:
+        print("El número es mayor.")
+        return False
+    elif intento > numero:
+        print("El número es menor.")
+        return False
+    else:
+        print("¡Has acertado!")
+        return True
 
-        except ValueError:
-            print("Introduce un número válido.")
+def jugar(limite):
+    secreto = obtener_numero(limite)
+    contador = 0
+    encontrado = False
 
-def calcular_puntos(intentos):
-    base = 100
-    puntos = max(base - intentos * 10, 10)
-    return puntos
+    while not encontrado:
+        intento = pedir_intento(limite)
+        contador += 1
+        encontrado = evaluar_intento(secreto, intento)
 
-def main():
-    mostrar_intro()
-    limite = elegir_dificultad()
+    print(f"Intentos utilizados: {contador}")
+    return contador
 
-    total_puntos = 0
-    rondas = 3
-    resultados = []
+def puntos(intentos):
+    puntuacion_base = 100
+    penalizacion = intentos * 10
+    resultado = puntuacion_base - penalizacion
 
-    for ronda in range(1, rondas + 1):
-        print(f"\n--- Ronda {ronda} ---")
+    if resultado < 10:
+        resultado = 10
+
+    return resultado
+
+def juego():
+    intro()
+    limite = seleccionar_nivel()
+
+    rondas_totales = 3
+    historial = []
+    puntuacion_total = 0
+
+    for i in range(rondas_totales):
+        print(f"\nRonda {i+1}")
         time.sleep(1)
 
-        intentos = jugar_ronda(limite)
-        puntos = calcular_puntos(intentos)
+        usados = jugar(limite)
+        historial.append(usados)
 
-        total_puntos += puntos
-        resultados.append(intentos)
+        score = puntos(usados)
+        puntuacion_total += score
 
-        print(f"Puntos ganados: {puntos}")
+        print(f"Puntos obtenidos: {score}")
 
-    print("\n=== RESULTADOS ===")
-    print("Intentos por ronda:", resultados)
-    print("Puntuación total:", total_puntos)
+    print("\n=== RESUMEN FINAL ===")
+    print("Intentos por ronda:", historial)
+    print("Puntuación final:", puntuacion_total)
 
 if __name__ == "__main__":
-    main()
+    juego()
